@@ -47,9 +47,13 @@ class Money
       # - +redis_url+ - The URL of the Redis server
       # - +namespace+ - Namespace with which to prefix all Redis keys
 
-      def initialize(base_currency, redis_url, namespace)
+      def initialize(base_currency, redis, namespace)
         @base_currency = base_currency
-        @redis = Redis.new(url: redis_url)
+        @redis = if redis.is_a?(String)
+          Redis.new(url: redis)
+        else
+          redis
+        end
         @namespace = namespace
       end
 
