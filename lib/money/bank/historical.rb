@@ -280,18 +280,17 @@ class Money
       end
 
       def fetch_stored_base_rate(currency, date)
-        date_rate_hash = @store.get_rates(currency)
+        rate = @store.get_rate_on_date(currency, date.iso8601)
 
-        if date_rate_hash && !date_rate_hash.empty?
-          rate = date_rate_hash[date.iso8601]
-          set_base_rates(currency, date_rate_hash)
+        if rate
+          set_base_rates(currency, Hash[date.iso8601, rate])
 
           rate
         end
       end
 
       def fetch_provider_base_rate(currency, date)
-        currency_date_rate_hash = @provider.fetch_rates(date)
+        currency_date_rate_hash = @provider.fetch_rates(date) || {}
 
         date_rate_hash = currency_date_rate_hash[currency.iso_code]
         rate = date_rate_hash && date_rate_hash[date.iso8601]

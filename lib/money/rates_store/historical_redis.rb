@@ -122,6 +122,15 @@ class Money
                                 "#{currency} - #{e.message}"\
       end
 
+      def get_rate_on_date(currency, date)
+        k = key(currency.iso_code)
+
+        @redis.hmget(k, date)[0]&.to_d
+      rescue Redis::BaseError => e
+        raise RequestFailed, 'Error while retrieving rates for '\
+                                "#{currency} - #{e.message}"\
+      end
+
       private
 
       # e.g. currency:EUR:USD

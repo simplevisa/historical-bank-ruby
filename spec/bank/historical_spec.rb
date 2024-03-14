@@ -223,10 +223,17 @@ class Money
         let(:expected_result) { Money.new(6530, to_currency) }
 
         before do
-          allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rates)
-            .with(from_currency).and_return(from_currency_base_rates_store)
-          allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rates)
-            .with(to_currency).and_return(to_currency_base_rates_store)
+          allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rate_on_date).with(from_currency, anything).and_return(nil)
+          allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rate_on_date).with(to_currency, anything).and_return(nil)
+
+          from_currency_base_rates_store&.each do |date, rate|
+            allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rate_on_date).with(from_currency, date).and_return(rate)
+          end
+
+          to_currency_base_rates_store&.each do |date, rate|
+            allow_any_instance_of(RatesStore::HistoricalRedis).to receive(:get_rate_on_date).with(to_currency, date).and_return(rate)
+          end
+
           allow_any_instance_of(RatesProvider::OpenExchangeRates)
             .to receive(:fetch_rates).with(date).and_return(rates_provider)
         end
